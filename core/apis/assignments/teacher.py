@@ -43,6 +43,8 @@ def grade_assignment(p, incoming_payload):
 
     assignment_dump = assignment_dump[0]
 
+    assignment_dump['grade'] = grade
+
     if assignment_dump["state"] is AssignmentStateEnum.DRAFT:
 
         return jsonify(error="FyleError"), 400
