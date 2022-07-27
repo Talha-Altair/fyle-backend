@@ -49,6 +49,7 @@ def submit_assignment(p, incoming_payload):
         teacher_id=submit_assignment_payload.teacher_id,
         principal=p
     )
+    
 
     db.session.commit()
     submitted_assignment_dump = AssignmentSchema().dump(submitted_assignment)
