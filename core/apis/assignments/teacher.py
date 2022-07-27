@@ -23,7 +23,10 @@ def grade_assignment(p, incoming_payload):
     """Grade ASsignement By ID"""
     payload = GradeSubmitSchema().load(incoming_payload)
 
+    teacher_id = p.teacher_id
+
     id = str(payload.id)
+
     try:
         grade = GradeEnum(payload.grade).name
     except:
@@ -42,7 +45,11 @@ def grade_assignment(p, incoming_payload):
 
     if assignment_dump["state"] is AssignmentStateEnum.DRAFT:
 
-            return jsonify(error="FyleError"), 400
+        return jsonify(error="FyleError"), 400
+
+    if assignment_dump["teacher_id"] is not teacher_id:
+
+        return jsonify(error="FyleError"), 400
 
     Assignment.grade_assignment(_id = id, grade=grade)
 
