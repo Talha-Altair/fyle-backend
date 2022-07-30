@@ -1,8 +1,11 @@
-from flask import Blueprint, jsonify
+from email import message
+from flask import Blueprint
 from core import db
 from core.apis import decorators
 from core.apis.responses import APIResponse
+from core.libs.exceptions import FyleError
 from core.models.assignments import Assignment, GradeEnum, AssignmentStateEnum
+from marshmallow.exceptions import ValidationError
 
 from .schema import AssignmentSchema, GradeSubmitSchema
 teacher_assignments_resources = Blueprint('teacher_assignments_resources', __name__)
@@ -30,8 +33,9 @@ def grade_assignment(p, incoming_payload):
     try:
         grade = GradeEnum(payload.grade).name
     except:
-        return jsonify(error="ValidationError"
-        ), 400
+        raise ValidationError(
+            message = "Invalid Grade"
+        )
 
     assignment = Assignment.get_assignments_by_id(id)
 
@@ -39,7 +43,9 @@ def grade_assignment(p, incoming_payload):
 
     if not assignment_dump:
 
-        return jsonify(error="FyleError"), 404
+        raise FyleError(
+            status_code=404,
+            message="Assignment Not found")
 
     assignment_dump = assignment_dump[0]
 
@@ -47,11 +53,15 @@ def grade_assignment(p, incoming_payload):
 
     if assignment_dump["state"] is AssignmentStateEnum.DRAFT:
 
-        return jsonify(error="FyleError"), 400
+        raise FyleError(
+            status_code=400,
+            message="Only Draft Assignments can be submitted")
 
     if assignment_dump["teacher_id"] is not teacher_id:
 
-        return jsonify(error="FyleError"), 400
+        raise FyleError(
+            status_code=400,
+            message="Only the Correct Teacher can Grade the Assignment")
 
     Assignment.grade_assignment(_id = id, grade=grade)
 

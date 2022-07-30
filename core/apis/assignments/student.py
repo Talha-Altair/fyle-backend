@@ -1,7 +1,8 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint
 from core import db
 from core.apis import decorators
 from core.apis.responses import APIResponse
+from core.libs.exceptions import FyleError
 from core.models.assignments import Assignment, AssignmentStateEnum
 
 from .schema import AssignmentSchema, AssignmentSubmitSchema
@@ -42,7 +43,9 @@ def submit_assignment(p, incoming_payload):
 
     if assignment.state is not AssignmentStateEnum.DRAFT:
 
-        return jsonify({"error":"FyleError","message":"only a draft assignment can be submitted"}), 400
+        raise FyleError(
+            status_code=400,
+            message="only a draft assignment can be submitted")
 
     submitted_assignment = Assignment.submit(
         _id=submit_assignment_payload.id,
